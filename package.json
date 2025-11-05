@@ -1,11 +1,9 @@
 {
-  "name": "professor",
+  "name": "professor-ia",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
-    "dev": "vercel dev"
+    "build": ""
   },
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^5.1.0"
-  }
+  "dependencies": {}
 }
