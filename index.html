@@ -248,7 +248,8 @@
       displayChat();
       textInput.value = '';
 
-      fetch('/api/chat', {
+      fetch('/api/index', {
+
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: chatHistory })
@@ -381,3 +382,4 @@
   </script>
 </body>
 </html>
+
