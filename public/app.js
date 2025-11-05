@@ -6,7 +6,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const VITE_OPENROUTER_API_KEY = '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';
+// 🔒 Usa variável de ambiente (definida na Vercel ou no .env local)
+const VITE_OPENROUTER_API_KEY = process.env.VITE_OPENROUTER_API_KEY;
 
 app.post('/chat', async (req, res) => {
   const { messages } = req.body;
@@ -29,11 +30,6 @@ app.post('/chat', async (req, res) => {
       return msg;
     });
 
-    console.log('Body enviado para API OpenRouter:', JSON.stringify({
-      model: 'google/gemma-3n-e4b-it:free',
-      messages: fullMessages
-    }, null, 2));
-
     const postData = JSON.stringify({
       model: 'google/gemma-3n-e4b-it:free',
       messages: fullMessages
@@ -52,38 +48,33 @@ app.post('/chat', async (req, res) => {
         }
       };
 
-      const req = https.request(options, (res) => {
+      const reqApi = https.request(options, (resApi) => {
         let chunks = [];
-        res.on('data', (chunk) => {
-          chunks.push(chunk);
-        });
-        res.on('end', () => {
+        resApi.on('data', (chunk) => chunks.push(chunk));
+        resApi.on('end', () => {
           const body = Buffer.concat(chunks).toString();
-          if (res.statusCode >= 200 && res.statusCode < 300) {
+          if (resApi.statusCode >= 200 && resApi.statusCode < 300) {
             try {
               resolve(JSON.parse(body));
-            } catch (e) {
+            } catch {
               reject(new Error('Invalid JSON response'));
             }
           } else {
-            console.error('Erro da API OpenRouter:', res.statusCode, body);
-            reject(new Error(`API error: ${res.statusCode} - ${body}`));
+            console.error('Erro da API OpenRouter:', resApi.statusCode, body);
+            reject(new Error(`API error: ${resApi.statusCode} - ${body}`));
           }
         });
       });
 
-      req.on('error', reject);
-      req.write(postData);
-      req.end();
+      reqApi.on('error', reject);
+      reqApi.write(postData);
+      reqApi.end();
     });
 
     const reply = data.choices[0].message.content;
     res.json({ reply });
   } catch (err) {
     console.error('Erro:', err);
-    if (err.response) {
-      console.error('Resposta da API:', err.response.data);
-    }
     res.status(500).json({ error: err.message });
   }
 });
